@@ -1,0 +1,27 @@
+master	ansible_host=192.168.150.2
+
+[nodes]
+ansibletarget1  ansible_host=192.168.150.3
+ansibletarget2  ansible_host=192.168.150.4
+
+[windows]
+
+activedirectory ansible_host=192.168.150.9
+
+[all:vars]
+ansible_connection=ssh
+ansible_ssh_user=mzabala
+#ansible_ssh_pass='{{ grace_become_pass }}'
+#ansible_become = true
+#ansible_become_pass='{{ grace_become_pass }}'
+##ansible_sudo_pass=sshvault.yml
+#password =  sshvault.yml
+
+
+[windows:vars]
+
+ansible_winrm_transport=ntlm
+ansible_port=5985
+ansible_connection=winrm
+ansible_winrm_server_cert_validation=ignore
+ansible_user=mzabala

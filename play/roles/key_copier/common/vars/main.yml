@@ -1,0 +1,5 @@
+users:
+  - account: "rcalma"
+    key: keys/rcalma.pub #"{{ lookup('file', 'keys/user1.pub') }}"
+  - account: "scalma"
+    key: keys/scalma.pub #"{{ lookup('file', 'keys/user2.pub') }}"

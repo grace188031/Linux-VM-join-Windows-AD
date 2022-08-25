@@ -1,0 +1,25 @@
+[sssd]
+domains = gracepractice.com
+config_file_version = 2
+services = nss, pam
+default_domain_suffix = gracepractice.com
+
+[domain/gracepractice.com]
+ad_domain = gracepractice.com
+krb5_realm = GRACEPRACTICE.COM
+realmd_tags = manages-system joined-with-samba
+cache_credentials = True
+id_provider = ad
+krb5_store_password_if_offline = True
+default_shell = /bin/bash
+ldap_id_mapping = True
+use_fully_qualified_names = True
+fallback_homedir = /home/%u@%d
+access_provider = ad
+ad_hostname = activedirectory.gracepractice.com
+dyndns_update = true
+dyndns_refresh_interval = 43200
+dyndns_update_ptr = true
+dyndns_ttl = 3600
+dyndns_auth = GSS-TSIG
+

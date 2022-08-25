@@ -1,0 +1,128 @@
+---
+ - name: "Automate linux ssh keys, sudo and join domain"
+   hosts: ansibletarget2
+   become: true
+   vars_files:
+    - ../group_vars/sshvault.yml
+   vars:
+    - ansible_become_pass: "{{ grace_become_pass }}"
+    - sudoers:
+        - admin_users
+        - sample
+
+   tasks:
+
+    - name: Install packages needed to join to active directory
+      ansible.builtin.yum:
+        name: "{{ packages }}"
+      vars:
+        packages:
+          - sssd
+          - realmd
+          - oddjob
+          - oddjob-mkhomedir
+          - oddjob-mkhomedir
+          - samba-common
+          - samba-common-tools
+          - krb5-workstation
+          - openldap-clients
+          - policycoreutils-python
+
+
+    - name: Check if machine joined to domain
+      ansible.builtin.shell:
+          cmd: realm list | grep -E "domain-name" | cut -d':' -f 2 | awk '{print $1}'
+      register: command_output
+      
+    - name: Join the machine to domain if not joined yet
+      ansible.builtin.shell:
+          cmd: echo {{ grace_become_pass }} | realm join -U mzabala gracepractice.com
+      when: command_output.stdout.find('gracepractice.com')==-1
+  
+    - name: Update entry into resolv
+      ansible.builtin.copy:
+           src: "/home/mzabala/ansible_project/play/templates/resolv.conf"
+           dest: "/etc/resolv.conf"
+           owner: root
+           group: root
+           mode: "0644"
+
+    - name: "Providing sudo access to linux team users"
+      lineinfile:
+        path: /etc/sudoers.d/{{ item }}
+        line: "%{{ item }}   ALL=(ALL)       ALL"
+        state: present
+        create: yes
+        validate: visudo -cf %s
+      with_items:
+        - "{{ sudoers }}"
+
+    - name: "COnfiguring SSSD. This is essential to avoid typing username@gracepractice.com"
+      ansible.builtin.copy:
+           src: "/home/mzabala/ansible_project/play/templates/sssd.conf"
+           dest: "/etc/sssd/sssd.conf"
+           owner: root
+           group: root
+           mode: "0600"
+    - name: Restart service sssd
+      ansible.builtin.service:
+           name: sssd
+           state: restarted
+
+
+ - name: create users from csv file
+   hosts: windows
+   roles:
+    - role: dictionary_maker
+   vars_files:
+    - ../group_vars/sshvault.yml
+   vars:
+    - ansible_password: "{{ ansible_password }}"
+   tasks:
+
+    - name: create users from the csv
+      win_domain_user:
+        name: "{{ item.username }}"
+        firstname: "{{ item.firstname }}"
+        surname: "{{ item.surname }}"
+        password: "{{ temporary_pass }}"
+        email: "{{ item.email }}"
+        upn: "{{ item.upn }}"
+ #       password_expired: yes   ##remove hashtag if you want users to setup their username wth temporary password
+        state: present
+        groups:
+          - admin_users
+        attributes:
+         displayName: '{{ item.firstname }} {{ item.surname }}'
+
+      with_items: "{{ user_list.list }}"
+      become_user: Administrator
+
+ - name: Add users to sudoers.d generate ssh keys and copying it to directory
+   hosts: ansibletarget2
+   become: yes
+   roles:
+    - role: key_copier
+    - role: dictionary_maker
+   vars_files:
+    - ../group_vars/sshvault.yml
+   vars:
+    - ansible_become_pass: "{{ grace_become_pass }}"
+
+   tasks:
+     - name: generate SSH key id_rsa
+       user:
+         name: "{{ item.username }}"
+         generate_ssh_key: yes
+         ssh_key_type: rsa
+         ssh_key_bits: 4096
+         ssh_key_file: .ssh/{{ item.username }}
+ #        ssh_key_passphrase: "{{ssh_passphrase}}"
+ #        force: no
+       with_items: "{{ user_list.list }}"
+
+
+
+
+ 
+ 

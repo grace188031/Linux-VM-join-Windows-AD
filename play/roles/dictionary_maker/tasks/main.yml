@@ -1,0 +1,15 @@
+   - name: reading the csv file
+     read_csv:
+      path: '/home/mzabala/ansible_project/play/roles/dictionary_maker/templates/Domain_users.csv'
+     register: user_list
+     delegate_to: localhost
+
+   - name: display user_list data
+     debug:
+      var: user_list.list
+
+   - name: extract Username from all dictionaries
+     debug:
+       msg: "{{ item.username }}"
+     with_items: "{{ user_list.list }}"
+

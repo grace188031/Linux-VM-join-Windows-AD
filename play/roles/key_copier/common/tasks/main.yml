@@ -1,0 +1,21 @@
+- name: "Debug"
+  debug:
+    var: users
+
+
+- name: Install public keys
+  ansible.posix.authorized_key: 
+     user: "{{ item['account'] }}"
+     state: present
+     key: "{{ lookup('file', item['key']) }}"
+  with_items: "{{ users }}"
+
+
+#    - name: "Install public keys"
+#      ansible.posix.authorized_key:
+#        key: "{{ lookup('env','HOME'/.ssh/{{ item.username }}.pub') }}"
+#        key: "{{ lookup('file','/home/{{ item.username }}@gracepractice.com/.ssh/{{ item.username }}.pub') }}"
+#        state: present
+#        user: "{{ item.username }}"
+#      with_items: "{{ user_list.list }}"
+
