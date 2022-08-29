@@ -36,4 +36,4 @@ There is also role setup under play directory to convert the csv file to diction
 
 ssh public key copier is in roles also. You must put all your ssh keys in files/keys in order to copy them in remote authorized public keys
 
-
+To run the playbook, execute ansible-playbook play/project_1.yml --ask-vault-pass
