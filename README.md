@@ -6,8 +6,9 @@ Automate add public ssh keys from ansible controller to ansible targets
 Configuration of Ansible vault to encrypt credentials located in ansible contrller to secure password connection to ansible targets
 
 In this lab I used VMware Wokstation and setup their network in Virtual Network Editor
-I also set the machines to have static IP as I have not built dedciated DHCP server for them
-DNS server is also in Active directory server so I set the DNS hostname of the machines there
+I also set the machines to have static IP as I have not built dedciated DHCP server for them. 
+Active directory server also acts as DNS server so DNS hostname also setup there.
+I also configured DNS forwarder in case DNS is resolvable publicly(8.8.8.8)
 
 Create 4 VMs
 
